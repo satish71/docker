@@ -1,21 +1,25 @@
 FROM ubuntu:16.06
-RUN echo version=1.0.0 > version
-RUN echo version=1.0.0 > version
+RUN echo "version=1.0.0" > version
 RUN apt-get update
 RUN apt-get -yq install vim
-RUN apt-get  -yq install sudo
+RUN apt-get -yq install sudo
 RUN apt-get -yq install ssh
 RUN apt-get -yq install rsync
-RUN apt-get -yq  install openjdk-8-jdk
+RUN apt-get -yq install openjdk-8-jdk
+RUN apt-get -yg install openssh-server
 RUN mkdir /var/run/sshd
-RUN echo 'root:screencast' | chpasswd
+RUN echo 'root:quatela12' | chpasswd
+
+# Changing ssd_config files
 RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 # SSH login fix. Otherwise user is kicked off after login
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
+#Enabling environment in Profile 
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
+#Exposing the port 22
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
