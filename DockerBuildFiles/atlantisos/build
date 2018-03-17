@@ -6,7 +6,7 @@ RUN apt-get -yq install sudo
 RUN apt-get -yq install ssh
 RUN apt-get -yq install rsync
 RUN apt-get -yq install openjdk-8-jdk
-RUN apt-get -yg install openssh-server
+RUN apt-get -yq install openssh-server
 RUN mkdir /var/run/sshd
 RUN echo 'root:quatela12' | chpasswd
 
