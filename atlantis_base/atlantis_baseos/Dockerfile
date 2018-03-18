@@ -23,6 +23,12 @@ RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/s
 # SSH login fix. Otherwise user is kicked off after login
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
+# Generate ssh key
+RUN \
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
+    chmod 0600 ~/.ssh/authorized_keys
+
 #Enabling environment in Profile 
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
@@ -35,9 +41,9 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN echo "JAVA_HOME=$JAVA_HOME" >> /etc/environment
 RUN echo "DISPLAY=0" >> /etc/environment
 
-RUN echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> ~./bashrc
-RUN echo "DISPLAY=0" >> ~./bashrc
-RUN source ~/.bashrc
+RUN echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> ~/.bashrc
+RUN echo "DISPLAY=0" >> ~/.bashrc
+#RUN source ~/.bashrc
 
 #Exposing the port 22
 EXPOSE 22
