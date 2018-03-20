@@ -30,29 +30,29 @@ RUN echo "export PATH=$PATH:$HADOOP_HOME/sbin" >> ~/.bashrc
 #    pdsh\
 
 RUN \
-    apt-get update && apt-get install -yq --reinstall build-essential && \
-    pdsh \ 	
+    apt-get update && apt-get install -yq pdsh
 
-# If you have already downloaded the tgz, add this line OR comment it AND ...
- ADD hadoop-3.0.0.tar.gz
+# If you have already downloaded the tgz, add this line OR comment it
+# Please note, add unzips to content
+RUN mkdir /install
+ADD hadoop-3.0.0.tar.gz /install
 
 # Download the distribution from Mirror
 #RUN wget http://www-us.apache.org/dist/hadoop/common/hadoop-3.0.0/hadoop-3.0.0.tar.gz
 
-# Unzip the contents
-RUN tar -xzf hadoop-3.0.0.tar.gz
+# Unzip the contents, uncomment if downloding from internet
+#RUN tar -xzf /install/hadoop-3.0.0.tar.gz
 
 # Move the hadoop standard variable 
-RUN mv hadoop-3.0.0 $HADOOP_HOME
+RUN mv /install/hadoop-3.0.0 $HADOOP_HOME
 
 # Add users to bash profile
-RUN \
-    for user in hadoop hdfs yarn mapred; do \
+RUN for user in hadoop hdfs yarn mapred; do \
          useradd -U -M -d /opt/hadoop/ --shell /bin/bash ${user}; \
     done && \
     for user in root hdfs yarn mapred; do \
          usermod -G hadoop ${user}; \
-    done && \
+    done
 
 
 # Setting JAVA_HOME in hadoop-env file. the parameter will be appended at the last. 
@@ -72,21 +72,29 @@ RUN mkdir $HADOOP_HOME/DataNode
 #    chmod 0600 ~/.ssh/authorized_keys
 
 # format the DataNode & NameNode
-RUN $HADOOP_HOME/bin/hdfs namenode -format
+#RUN $HADOOP_HOME/bin/hdfs namenode -format
 
 
 # starting the name node 
-#RUN .$HADOOP_HOME/sbin/hadoop-daemon.sh start namenode
+#RUN $HADOOP_HOME/sbin/hadoop-daemon.sh start namenode;exit 0
 # starting the data node 
-#RUN .$HADOOP_HOME/sbin/hadoop-daemon.sh start datanode
+RUN $HADOOP_HOME/sbin/hadoop-daemon.sh start datanode;exit 0
 # starting the secondaryName node 
-#RUN .$HADOOP_HOME/sbin/hadoop-daemon.sh start secondarynamenode
+#RUN $HADOOP_HOME/sbin/hadoop-daemon.sh start secondarynamenode;exit 0
 # starting yarn resource manager
-#RUN .$HADOOP_HOME/sbin/yarn-daemon.sh start resourcemanager
+#RUN $HADOOP_HOME/sbin/yarn-daemon.sh start resourcemanager;exit 0
 # starting yarn node manager
-#RUN .$HADOOP_HOME/sbin/yarn-daemon.sh start nodemanager 
+#RUN $HADOOP_HOME/sbin/yarn-daemon.sh start nodemanager;exit 0
+# checking the status
+#RUN jps;exit 0 
+
+#Adding Ssh config
+ADD ssh_config /root/.ssh/config
+
+#Adding a startup script
+ADD start-all.sh /
 
 
 EXPOSE 22 8088 9870 9864 19888 8042 8888
-CMD /usr/sbin/sshd -D
-CMD bash /opt/hadoop/sbin/start-all.sh
+#CMD /usr/sbin/sshd -D
+#CMD start-all.sh
